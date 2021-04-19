@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require("path");
-const db = require("./db/dbindex");
+const db = require("./dbindex");
 
 const app = express();
 const PORT = 5500;
@@ -11,9 +11,6 @@ app.listen(PORT, (err) => {
 
     console.log("connected to server...");
 });
-
-//make a folder static
-app.use(express.static(path.join(__dirname, 'public')));
 
 //create a table
 // db.createTable();
