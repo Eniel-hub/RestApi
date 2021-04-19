@@ -1,74 +1,65 @@
-const mysql = require('mysql');
+const express = require("express");
+const path = require("path");
+const db = require("./db/dbindex");
 
-const connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'expressjs',
-  password : 'password',
-  database : 'expressjs'
+const app = express();
+const PORT = 5500;
+
+//listen to a port
+app.listen(PORT, (err) => {
+    if(err) {throw err};
+
+    console.log("connected to server...");
 });
- 
-connection.connect((err)=>{
-  if(err){throw err;}
-  console.log("Connected to database...");
+
+//make a folder static
+app.use(express.static(path.join(__dirname, 'public')));
+
+//create a table
+// db.createTable();
+
+//retrieve data
+app.get('/api/users', async(req, res) =>{
+    try {
+        let result = await db.getAll();
+        res.json(result)
+    } catch (err) {
+        console.log(err)
+    }
 });
 
-const db = {
-  
-  //create a table
-  createTable: () => {
-    const sql = "CREATE TABLE test_table (id INT AUTO_INCREMENT, Fistname VARCHAR(80), Lastname VARCHAR(80), PRIMARY KEY (id));";
-    connection.query(sql, (err) =>{
-      if(err){throw err;}
-      console.log("Table created...");
-    })
-  },
+//create new user
+app.post('/api/new_user', async(req ,res) =>{
+    const Firstname = "Eniel";
+    const Lastname = "Leba";
+    try {
+        let result = await db.add(Firstname, Lastname);
+        res.send(result)
+    } catch (err) {
+        console.log(err)
+    }
+})
 
-  //retreive all data from the table
-  getAll: () =>{
-    return new Promise ((resolve, reject) =>{
-      const sql = "SELECT* FROM test_table;";
-      connection.query(sql, (err, results) =>{
-        if(err) {return reject(err)}
-        return resolve(results);
-      })
-    })
-  },
+//update user
+app.put('/api/update/:id', async(req ,res) =>{
+    id = req.params.id;
+    const Firstname = "Sara";
+    const Lastname = "White";
+    try {
+        let result = await db.update(id, Firstname, Lastname);
+        res.send(result)
+    } catch (err) {
+        console.log(err)
+    }
+})
 
-  //add a record
-  add: (fistname, lastname) =>{
-    return new Promise ((resolve, reject) => {
-      const data = {fistname, lastname}
-      const sql = "INSERT INTO test_table SET ?"
-      connection.query(sql, data, (err) =>{
-        if(err){reject(err)}
-        return resolve("data inserted into database...");
-      })
-    })   
-  },
-
-  //update a record
-  update: (id, fistname, lastname) =>{
-    return new Promise ((resolve, reject) => {
-      const data = {id: id, fistname, lastname}
-      const sql = "REPLACE INTO test_table SET ?"
-      connection.query(sql, data, (err) =>{
-        if(err){reject(err)}
-        return resolve("data updated...");
-      })
-    })   
-  },
-
-  //delete a record
-  delete: (id) =>{
-    return new Promise ((resolve, reject) => {
-      const sql = "DELETE FROM test_table WHERE id = ?"
-      connection.query(sql, id, (err) =>{
-        if(err){reject(err)}
-        return resolve("data deleted...");
-      })
-    })   
-  }
-};
-
-module.exports = db;
- 
+//delete user
+app.delete('/api/delete/:id', async(req ,res) =>{
+    id = req.params.id;
+    try {
+        let result = await db.delete(id);
+        res.send(result)
+    } catch (err) {
+        console.log(err)
+    }
+})
